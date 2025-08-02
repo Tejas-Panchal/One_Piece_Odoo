@@ -63,11 +63,34 @@ export const updateTicket = createAsyncThunk('tickets/update', async ({ ticketId
     }
 });
 
+// Create a category
+export const createCategory = createAsyncThunk('tickets/createCategory', async (categoryData, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token;
+        return await ticketService.createCategory(categoryData, token);
+    } catch (error) {
+        const message = (error.response?.data?.message) || error.message || error.toString();
+        return thunkAPI.rejectWithValue(message);
+    }
+});
+
+// Delete a category
+export const deleteCategory = createAsyncThunk('tickets/deleteCategory', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token;
+        return await ticketService.deleteCategory(id, token);
+    } catch (error) {
+        const message = (error.response?.data?.message) || error.message || error.toString();
+        return thunkAPI.rejectWithValue(message);
+    }
+});
+
 export const ticketSlice = createSlice({
     name: 'ticket',
     initialState,
     reducers: {
         reset: (state) => {
+            state.ticket = {};
             state.isLoading = false;
             state.isSuccess = false;
             state.isError = false;
@@ -136,6 +159,36 @@ export const ticketSlice = createSlice({
                 }
                 // Also update the single ticket view
                 state.ticket = action.payload;
+            })
+            .addCase(createCategory.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(createCategory.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                // Add to categories list without refetching
+                state.categories.push(action.payload);
+                state.message = 'Category created successfully';
+            })
+            .addCase(createCategory.rejected, (state, action) => {
+                state.isLoading = false;
+                state.isError = true;
+                state.message = action.payload;
+            })
+            .addCase(deleteCategory.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(deleteCategory.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                // Remove from categories list without refetching
+                state.categories = state.categories.filter((cat) => cat._id !== action.payload.id);
+                state.message = action.payload.message;
+            })
+            .addCase(deleteCategory.rejected, (state, action) => {
+                state.isLoading = false;
+                state.isError = true;
+                state.message = action.payload;
             });
     },
 });

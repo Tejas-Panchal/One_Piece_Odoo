@@ -4,12 +4,22 @@ const Category = require('../models/categoryModel');
 
 const getTickets = async (req, res) => {
   try {
-    let tickets;
+    let query;
+
+    // If user is an agent or admin, the query is empty (find all)
+    // Otherwise, the query filters for tickets by the logged-in user's ID
     if (req.user.role === 'Support Agent' || req.user.role === 'Admin') {
-      tickets = await Ticket.find({}).populate('user', 'name email').populate('category', 'name');
+      query = Ticket.find({});
     } else {
-      tickets = await Ticket.find({ user: req.user.id }).populate('user', 'name email').populate('category', 'name');
+      query = Ticket.find({ user: req.user.id });
     }
+
+    const tickets = await query
+      .populate('user', 'name email')
+      .populate('category', 'name')
+      .populate('assignedTo', 'name email')
+      .sort({ createdAt: -1 }); 
+
     res.status(200).json(tickets);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -18,7 +28,11 @@ const getTickets = async (req, res) => {
 
 const getTicketById = async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id).populate('user', 'name').populate('category', 'name');
+    
+    const ticket = await Ticket.findById(req.params.id)
+      .populate('user', 'name email')
+      .populate('category', 'name')
+      .populate('assignedTo', 'name email'); 
 
     if (!ticket) {
       return res.status(404).json({ message: 'Ticket not found' });
@@ -36,7 +50,7 @@ const getTicketById = async (req, res) => {
 
 const createTicket = async (req, res) => {
   try {
-    const { subject, description, category } = req.body;
+    const { subject, description, category, attachments } = req.body;
 
     if (!subject || !description || !category) {
       return res.status(400).json({ message: 'Please include subject, description, and category' });
@@ -52,6 +66,7 @@ const createTicket = async (req, res) => {
       subject,
       description,
       category,
+      attachments
     });
 
     res.status(201).json(ticket);
@@ -62,7 +77,8 @@ const createTicket = async (req, res) => {
 
 const updateTicket = async (req, res) => {
     try {
-        const { status, comment } = req.body;
+        // Get status, comment, or assignedTo from the request body
+        const { status, comment, assignedTo } = req.body;
 
         const ticket = await Ticket.findById(req.params.id);
 
@@ -70,18 +86,26 @@ const updateTicket = async (req, res) => {
             return res.status(404).json({ message: 'Ticket not found' });
         }
 
+        // An End User can only add a comment to their own ticket
         if (ticket.user.toString() !== req.user.id && req.user.role === 'End User') {
             return res.status(403).json({ message: 'User not authorized' });
         }
 
-        if (status && req.user.role !== 'Support Agent' && req.user.role !== 'Admin') {
-            return res.status(403).json({ message: 'Not authorized to change ticket status' });
+        // --- AGENT/ADMIN ONLY ACTIONS ---
+        if (req.user.role === 'Support Agent' || req.user.role === 'Admin') {
+            if (status) {
+                ticket.status = status;
+            }
+            if (assignedTo) {
+                ticket.assignedTo = assignedTo;
+            }
+        } else { // If user is not an agent, they cannot change status or assign
+            if (status || assignedTo) {
+                return res.status(403).json({ message: 'Not authorized to perform this action' });
+            }
         }
 
-        if (status) {
-            ticket.status = status;
-        }
-        
+        // Anyone authorized can add a comment
         if (comment) {
             const commentObj = {
                 user: req.user.id,
@@ -92,7 +116,12 @@ const updateTicket = async (req, res) => {
         }
 
         const updatedTicket = await ticket.save();
-        res.status(200).json(updatedTicket);
+        // Populate user details in the response
+        const populatedTicket = await Ticket.findById(updatedTicket._id)
+                                                .populate('user', 'name email')
+                                                .populate('category', 'name')
+                                                .populate('assignedTo', 'name email');
+        res.status(200).json(populatedTicket);
 
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

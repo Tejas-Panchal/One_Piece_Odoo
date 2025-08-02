@@ -11,14 +11,14 @@ const getCategories = async () => {
 
 // Create new ticket
 const createTicket = async (ticketData, token) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
 
-  const response = await axios.post(API_URL, ticketData, config);
-  return response.data;
+    const response = await axios.post(API_URL, ticketData, config);
+    return response.data;
 };
 
 const getTickets = async (token) => {
@@ -54,12 +54,33 @@ const updateTicket = async (ticketId, updateData, token) => {
     return response.data;
 }
 
+const deleteCategory = async (categoryId, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
+    const response = await axios.delete(CATEGORY_API_URL + categoryId, config);
+    return response.data;
+}
+const createCategory = async (categoryData, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
+    const response = await axios.post(CATEGORY_API_URL, categoryData, config);
+    return response.data;
+}
+
 const ticketService = {
-  createTicket,
-  getCategories,
-  getTickets,
-  getTicket,
-  updateTicket,
+    createTicket,
+    getCategories,
+    getTickets,
+    getTicket,
+    updateTicket,
+    deleteCategory,
+    createCategory,
 };
 
 export default ticketService;

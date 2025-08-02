@@ -9,6 +9,9 @@ import Header from './components/Header';
 import NewTicket from './pages/NewTicket';
 import Tickets from './pages/Tickets';
 import Ticket from './pages/Ticket';
+import AdminRoute from './components/AdminRoute'; // IMPORT
+import CategoryAdmin from './pages/admin/CategoryAdmin'; 
+import UserAdmin from './pages/admin/UserAdmin'; 
 
 function App() {
   return (
@@ -33,6 +36,12 @@ function App() {
             </Route>
             <Route path='/ticket/:ticketId' element={<PrivateRoute />}>
                 <Route path='/ticket/:ticketId' element={<Ticket />} />
+            </Route>
+            <Route path='/admin/categories' element={<AdminRoute />}>
+                <Route path='/admin/categories' element={<CategoryAdmin />} />
+            </Route>
+            <Route path='/admin/users' element={<AdminRoute />}>
+                <Route path='/admin/users' element={<UserAdmin />} />
             </Route>
 
           </Routes>
