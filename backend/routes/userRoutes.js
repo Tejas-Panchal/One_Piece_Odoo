@@ -1,8 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.status(200).json({ message: 'Welcome to the User API' });
-});
+const { registerUser, loginUser, getMe, getUsers, updateUserRole } = require('../controllers/userController');
+const { protect, admin } = require('../middleware/authMiddleware');
+
+router.post('/register', registerUser); 
+router.post('/login', loginUser);
+router.get('/me', protect, getMe);
+
+router.get('/', protect, admin, getUsers);
+router.put('/:id/role', protect, admin, updateUserRole);
 
 module.exports = router;
