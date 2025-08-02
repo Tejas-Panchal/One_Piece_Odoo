@@ -5,8 +5,6 @@ QuickDesk is a simple, easy-to-use help desk solution built with the MERN stack 
 This project was built as a comprehensive demonstration of modern full-stack web development, covering everything from backend API design and authentication to frontend state management and role-based UI.
 
 
-*(Replace the above URL with a real screenshot of your application!)*
-
 ## Table of Contents
 
 - [Features](#features)
@@ -80,8 +78,8 @@ You need to have the following software installed on your machine:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/quickdesk-app.git
-    cd quickdesk-app
+    git clone https://github.com/Tejas-Panchal/One_Piece_Odoo
+    cd one_piece_odoo
     ```
 
 2.  **Set up the Backend:**
@@ -89,22 +87,7 @@ You need to have the following software installed on your machine:
     cd backend
     npm install
     ```
-    Create a `.env` file in the `/backend` directory and add the following environment variables. Use the `.env.example` file as a template.
-    ```
-    MONGO_URI=your_mongodb_connection_string
-    PORT=5000
-    JWT_SECRET=your_super_secret_jwt_key
-
-    # Cloudinary
-    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-    CLOUDINARY_API_KEY=your_cloudinary_api_key
-    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-
-    # SendGrid
-    SENDGRID_API_KEY=your_sendgrid_api_key
-    SENDGRID_FROM_EMAIL=your_verified_sender_email
-    ```
-
+    
 3.  **Set up the Frontend:**
     ```bash
     cd ../frontend
